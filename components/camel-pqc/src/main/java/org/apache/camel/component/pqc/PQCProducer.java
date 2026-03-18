@@ -18,7 +18,9 @@ package org.apache.camel.component.pqc;
 
 import java.security.*;
 import java.security.cert.Certificate;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import javax.crypto.KeyAgreement;
 import javax.crypto.KeyGenerator;
@@ -50,6 +52,24 @@ import org.slf4j.LoggerFactory;
 public class PQCProducer extends DefaultProducer {
 
     private static final Logger LOG = LoggerFactory.getLogger(PQCProducer.class);
+
+    // Valid symmetric key lengths per algorithm for startup validation
+    private static final Map<String, int[]> VALID_SYMMETRIC_KEY_LENGTHS = Map.ofEntries(
+            Map.entry(PQCSymmetricAlgorithms.AES.name(), new int[] { 128, 192, 256 }),
+            Map.entry(PQCSymmetricAlgorithms.ARIA.name(), new int[] { 128, 192, 256 }),
+            Map.entry(PQCSymmetricAlgorithms.CAMELLIA.name(), new int[] { 128, 192, 256 }),
+            Map.entry(PQCSymmetricAlgorithms.CAST6.name(), new int[] { 128, 160, 192, 224, 256 }),
+            Map.entry(PQCSymmetricAlgorithms.CHACHA7539.name(), new int[] { 256 }),
+            Map.entry(PQCSymmetricAlgorithms.DSTU7624.name(), new int[] { 128, 256, 512 }),
+            Map.entry(PQCSymmetricAlgorithms.GOST28147.name(), new int[] { 256 }),
+            Map.entry(PQCSymmetricAlgorithms.GOST3412_2015.name(), new int[] { 256 }),
+            Map.entry(PQCSymmetricAlgorithms.GRAIN128.name(), new int[] { 128 }),
+            Map.entry(PQCSymmetricAlgorithms.HC128.name(), new int[] { 128 }),
+            Map.entry(PQCSymmetricAlgorithms.HC256.name(), new int[] { 256 }),
+            Map.entry(PQCSymmetricAlgorithms.SALSA20.name(), new int[] { 128, 256 }),
+            Map.entry(PQCSymmetricAlgorithms.SEED.name(), new int[] { 128 }),
+            Map.entry(PQCSymmetricAlgorithms.SM4.name(), new int[] { 128 }),
+            Map.entry(PQCSymmetricAlgorithms.DESEDE.name(), new int[] { 128, 192 }));
 
     private Signature signer;
     private KeyGenerator keyGenerator;
@@ -249,6 +269,7 @@ public class PQCProducer extends DefaultProducer {
     @Override
     protected void doStart() throws Exception {
         super.doStart();
+        validateConfiguration();
 
         if (getConfiguration().getOperation().equals(PQCOperations.sign)
                 || getConfiguration().getOperation().equals(PQCOperations.verify)) {
@@ -760,6 +781,145 @@ public class PQCProducer extends DefaultProducer {
         KeyLifecycleManager klm = getConfiguration().getKeyLifecycleManager();
         if (klm != null) {
             klm.deleteKey(keyId);
+        }
+    }
+
+    // ========== Configuration Validation ==========
+
+    /**
+     * Validates the producer configuration at startup to catch invalid or non-recommended algorithm combinations and
+     * key sizes early, before any cryptographic operation is attempted.
+     */
+    private void validateConfiguration() {
+        PQCConfiguration config = getConfiguration();
+        PQCOperations op = config.getOperation();
+
+        validateSymmetricKeyLength(config, op);
+        warnHybridCombinations(config, op);
+        logNistRecommendations(config);
+    }
+
+    private void validateSymmetricKeyLength(PQCConfiguration config, PQCOperations op) {
+        if (!isKEMOperation(op)) {
+            return;
+        }
+        String symAlg = config.getSymmetricKeyAlgorithm();
+        if (ObjectHelper.isEmpty(symAlg)) {
+            return;
+        }
+        int keyLen = config.getSymmetricKeyLength();
+        int[] validLengths = VALID_SYMMETRIC_KEY_LENGTHS.get(symAlg);
+        if (validLengths != null) {
+            boolean valid = false;
+            for (int len : validLengths) {
+                if (len == keyLen) {
+                    valid = true;
+                    break;
+                }
+            }
+            if (!valid) {
+                throw new IllegalArgumentException(
+                        "Invalid symmetric key length " + keyLen + " for algorithm " + symAlg
+                                                   + ". Valid key lengths: " + Arrays.toString(validLengths));
+            }
+        }
+    }
+
+    private void warnHybridCombinations(PQCConfiguration config, PQCOperations op) {
+        if (op == PQCOperations.hybridSign || op == PQCOperations.hybridVerify) {
+            String classicalAlg = config.getClassicalSignatureAlgorithm();
+            if (ObjectHelper.isNotEmpty(classicalAlg)) {
+                try {
+                    PQCClassicalSignatureAlgorithms classical = PQCClassicalSignatureAlgorithms.valueOf(classicalAlg);
+                    if (classical.isRSA()) {
+                        LOG.warn("Using RSA ({}) in hybrid signature mode. ECDSA or EdDSA (Ed25519/Ed448) "
+                                 + "is recommended for new hybrid deployments due to smaller signature sizes "
+                                 + "and better performance.",
+                                classicalAlg);
+                    }
+                } catch (IllegalArgumentException e) {
+                    // Unknown classical algorithm - will fail later during init
+                }
+            }
+            String pqcAlg = config.getSignatureAlgorithm();
+            if (ObjectHelper.isNotEmpty(pqcAlg) && isNonNistSignature(pqcAlg)) {
+                LOG.warn("PQC signature algorithm {} is not NIST-standardized. Consider using "
+                         + "ML-DSA (FIPS 204) or SLH-DSA (FIPS 205) for production hybrid deployments.",
+                        pqcAlg);
+            }
+        }
+
+        if (op == PQCOperations.hybridGenerateSecretKeyEncapsulation
+                || op == PQCOperations.hybridExtractSecretKeyEncapsulation
+                || op == PQCOperations.hybridExtractSecretKeyFromEncapsulation) {
+            String pqcAlg = config.getKeyEncapsulationAlgorithm();
+            if (ObjectHelper.isNotEmpty(pqcAlg) && isNonNistKEM(pqcAlg)) {
+                LOG.warn("PQC KEM algorithm {} is not NIST-standardized. Consider using "
+                         + "ML-KEM (FIPS 203) for production hybrid deployments.",
+                        pqcAlg);
+            }
+        }
+    }
+
+    private void logNistRecommendations(PQCConfiguration config) {
+        String kemAlg = config.getKeyEncapsulationAlgorithm();
+        if ("MLKEM".equals(kemAlg)) {
+            LOG.info("Using ML-KEM (NIST FIPS 203). Available parameter sets: "
+                     + "ML-KEM-512 (Level 1), ML-KEM-768 (Level 3, recommended), ML-KEM-1024 (Level 5)");
+        }
+
+        String sigAlg = config.getSignatureAlgorithm();
+        if ("MLDSA".equals(sigAlg)) {
+            LOG.info("Using ML-DSA (NIST FIPS 204). Available parameter sets: "
+                     + "ML-DSA-44 (Level 2), ML-DSA-65 (Level 3, recommended), ML-DSA-87 (Level 5)");
+        } else if ("SLHDSA".equals(sigAlg)) {
+            LOG.info("Using SLH-DSA (NIST FIPS 205). Stateless hash-based signature scheme suitable for "
+                     + "applications where stateful key management is not feasible");
+        }
+    }
+
+    private boolean isKEMOperation(PQCOperations op) {
+        switch (op) {
+            case generateSecretKeyEncapsulation:
+            case extractSecretKeyEncapsulation:
+            case extractSecretKeyFromEncapsulation:
+            case hybridGenerateSecretKeyEncapsulation:
+            case hybridExtractSecretKeyEncapsulation:
+            case hybridExtractSecretKeyFromEncapsulation:
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private boolean isNonNistSignature(String alg) {
+        switch (alg) {
+            case "DILITHIUM":
+            case "FALCON":
+            case "PICNIC":
+            case "SNOVA":
+            case "MAYO":
+            case "SPHINCSPLUS":
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    private boolean isNonNistKEM(String alg) {
+        switch (alg) {
+            case "BIKE":
+            case "HQC":
+            case "CMCE":
+            case "SABER":
+            case "FRODO":
+            case "NTRU":
+            case "NTRULPRime":
+            case "SNTRUPrime":
+            case "KYBER":
+                return true;
+            default:
+                return false;
         }
     }
 
