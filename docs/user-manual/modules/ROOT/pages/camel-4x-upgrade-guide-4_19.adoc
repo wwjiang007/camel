@@ -399,6 +399,16 @@ HttpRequest request = context.getAttribute(AS2ClientManager.HTTP_REQUEST, HttpRe
 HttpRequest request = context.getRequest();
 ----
 
+=== camel-couchbase
+
+The consumer now supports SQL++ (N1QL) queries as an alternative to the deprecated MapReduce Views.
+Use the new `statement` endpoint option to specify a SQL++ query. When `statement` is set, the consumer
+uses `scope.query()` instead of `bucket.viewQuery()`.
+
+The `designDocumentName` and `viewName` endpoint options are now deprecated. MapReduce Views were
+deprecated in Couchbase Server 7.0 and do not work with the Magma storage backend (default since
+Couchbase Server 8.0). Users should migrate to SQL++ queries using the `statement` option.
+
 === camel-ftp
 
 The `camel-ftp` component has been refactored to extract shared FTP/SFTP code into a new `camel-ftp-common` module.

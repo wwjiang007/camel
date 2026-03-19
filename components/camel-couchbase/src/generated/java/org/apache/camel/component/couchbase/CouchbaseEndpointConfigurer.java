@@ -95,6 +95,7 @@ public class CouchbaseEndpointConfigurer extends PropertyConfigurerSupport imple
         case "startScheduler": target.setStartScheduler(property(camelContext, boolean.class, value)); return true;
         case "startingidforinsertsfrom":
         case "startingIdForInsertsFrom": target.setStartingIdForInsertsFrom(property(camelContext, long.class, value)); return true;
+        case "statement": target.setStatement(property(camelContext, java.lang.String.class, value)); return true;
         case "timeunit":
         case "timeUnit": target.setTimeUnit(property(camelContext, java.util.concurrent.TimeUnit.class, value)); return true;
         case "usefixeddelay":
@@ -181,6 +182,7 @@ public class CouchbaseEndpointConfigurer extends PropertyConfigurerSupport imple
         case "startScheduler": return boolean.class;
         case "startingidforinsertsfrom":
         case "startingIdForInsertsFrom": return long.class;
+        case "statement": return java.lang.String.class;
         case "timeunit":
         case "timeUnit": return java.util.concurrent.TimeUnit.class;
         case "usefixeddelay":
@@ -268,6 +270,7 @@ public class CouchbaseEndpointConfigurer extends PropertyConfigurerSupport imple
         case "startScheduler": return target.isStartScheduler();
         case "startingidforinsertsfrom":
         case "startingIdForInsertsFrom": return target.getStartingIdForInsertsFrom();
+        case "statement": return target.getStatement();
         case "timeunit":
         case "timeUnit": return target.getTimeUnit();
         case "usefixeddelay":

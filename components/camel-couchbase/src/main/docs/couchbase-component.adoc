@@ -2,7 +2,7 @@
 :doctitle: Couchbase
 :shortname: couchbase
 :artifactid: camel-couchbase
-:description: Query Couchbase Views with a poll strategy and/or perform various operations against Couchbase databases.
+:description: Query Couchbase databases using SQL (N1QL) queries or MapReduce Views with a poll strategy and/or perform various operations against Couchbase databases.
 :since: 2.19
 :supportlevel: Stable
 :tabs-sync-option:
@@ -43,6 +43,28 @@ include::partial$component-configure-options.adoc[]
 include::partial$component-endpoint-options.adoc[]
 include::partial$component-endpoint-headers.adoc[]
 // component options: END
+
+== Consuming with SQL++ (N1QL) queries
+
+Since Couchbase Server 7.0, the recommended way to query documents is using SQL++ (formerly N1QL) instead of
+MapReduce Views, which are deprecated since Couchbase 7.0 and do not work with the Magma storage backend
+(default since Couchbase 8.0).
+
+To use SQL++ queries, set the `statement` endpoint option:
+
+[source,java]
+----
+from("couchbase:http://localhost?bucket=myBucket&username=user&password=pass"
+    + "&statement=SELECT META().id AS __id, * FROM `myCollection` LIMIT 100")
+    .to("direct:result");
+----
+
+The query must include `META().id AS \__id` in the SELECT clause so the consumer can identify each document.
+When `fullDocument` is `true` (the default), the consumer fetches the complete document from the KV store using
+the document ID. When `false`, the query result row is used directly as the message body.
+
+NOTE: SQL++ queries require a primary index or appropriate secondary index on the bucket/collection.
+Create one with: `CREATE PRIMARY INDEX ON \`myBucket\`` or via the Couchbase SDK.
 
 == Couchbase SDK compatibility
 

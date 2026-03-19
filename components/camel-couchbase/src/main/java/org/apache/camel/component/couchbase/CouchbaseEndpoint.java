@@ -56,7 +56,8 @@ import static org.apache.camel.component.couchbase.CouchbaseConstants.DEFAULT_QU
 import static org.apache.camel.component.couchbase.CouchbaseConstants.DEFAULT_VIEWNAME;
 
 /**
- * Query Couchbase Views with a poll strategy and/or perform various operations against Couchbase databases.
+ * Query Couchbase databases using SQL++ (N1QL) queries or MapReduce Views with a poll strategy and/or perform various
+ * operations against Couchbase databases.
  */
 @UriEndpoint(firstVersion = "2.19.0", scheme = "couchbase", title = "Couchbase", syntax = "couchbase:protocol://hostname:port",
              category = { Category.DATABASE }, headersClass = CouchbaseConstants.class)
@@ -114,10 +115,23 @@ public class CouchbaseEndpoint extends ScheduledPollEndpoint implements Endpoint
 
     @UriParam(label = "producer")
     private long startingIdForInsertsFrom;
+
+    // SQL++ query
+    @UriParam(label = "consumer",
+              description = "A SQL++ (N1QL) query statement for consuming documents."
+                            + " When set, the consumer uses SQL++ queries instead of MapReduce views."
+                            + " The query should select META().id AS __id to identify documents."
+                            + " Example: SELECT META().id AS __id, * FROM `myCollection` WHERE type = 'order' LIMIT 100")
+    private String statement;
+
     // View control
-    @UriParam(label = "consumer", defaultValue = DEFAULT_DESIGN_DOCUMENT_NAME)
+    @UriParam(label = "consumer", defaultValue = DEFAULT_DESIGN_DOCUMENT_NAME,
+              description = "The design document name to use. Deprecated: use the statement option with SQL++ queries instead.")
+    @Deprecated
     private String designDocumentName = DEFAULT_DESIGN_DOCUMENT_NAME;
-    @UriParam(label = "consumer", defaultValue = DEFAULT_VIEWNAME)
+    @UriParam(label = "consumer", defaultValue = DEFAULT_VIEWNAME,
+              description = "The view name to use. Deprecated: use the statement option with SQL++ queries instead.")
+    @Deprecated
     private String viewName = DEFAULT_VIEWNAME;
     @UriParam(label = "consumer", defaultValue = "-1")
     private int limit = -1;
@@ -399,24 +413,47 @@ public class CouchbaseEndpoint extends ScheduledPollEndpoint implements Endpoint
         this.consumerRetryPause = consumerRetryPause;
     }
 
+    public String getStatement() {
+        return statement;
+    }
+
+    /**
+     * A SQL++ (N1QL) query statement for consuming documents. When set, the consumer uses SQL++ queries instead of
+     * MapReduce views. The query should select META().id AS __id to identify documents. Example: SELECT META().id AS
+     * __id, * FROM `myCollection` WHERE type = 'order' LIMIT 100
+     */
+    public void setStatement(String statement) {
+        this.statement = statement;
+    }
+
+    /**
+     * @deprecated Use {@link #setStatement(String)} with SQL++ queries instead.
+     */
+    @Deprecated
     public String getDesignDocumentName() {
         return designDocumentName;
     }
 
     /**
-     * The design document name to use
+     * @deprecated Use {@link #setStatement(String)} with SQL++ queries instead.
      */
+    @Deprecated
     public void setDesignDocumentName(String designDocumentName) {
         this.designDocumentName = designDocumentName;
     }
 
+    /**
+     * @deprecated Use {@link #setStatement(String)} with SQL++ queries instead.
+     */
+    @Deprecated
     public String getViewName() {
         return viewName;
     }
 
     /**
-     * The view name to use
+     * @deprecated Use {@link #setStatement(String)} with SQL++ queries instead.
      */
+    @Deprecated
     public void setViewName(String viewName) {
         this.viewName = viewName;
     }
