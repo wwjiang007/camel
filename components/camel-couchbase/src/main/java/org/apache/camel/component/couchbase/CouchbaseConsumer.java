@@ -60,6 +60,8 @@ public class CouchbaseConsumer extends ScheduledBatchPollingConsumer implements 
     private Scope scope;
     private Collection collection;
     private ViewOptions viewOptions;
+    private boolean useSqlQuery;
+    private String sqlStatement;
 
     private ResumeStrategy resumeStrategy;
 
@@ -85,7 +87,19 @@ public class CouchbaseConsumer extends ScheduledBatchPollingConsumer implements 
             this.collection = bucket.defaultCollection();
         }
 
-        if (endpoint.getStatement() == null) {
+        // Determine query mode
+        if (endpoint.getStatement() != null) {
+            // Explicit SQL++ statement provided
+            useSqlQuery = true;
+            sqlStatement = endpoint.getStatement();
+        } else if (!endpoint.isUseView()) {
+            // Auto-generate SQL++ from endpoint options
+            useSqlQuery = true;
+            sqlStatement = endpoint.buildSqlQuery();
+            LOG.info("Auto-generated SQL++ query: {}", sqlStatement);
+        } else {
+            // Use deprecated MapReduce views
+            useSqlQuery = false;
             initViewOptions();
         }
     }
@@ -133,7 +147,7 @@ public class CouchbaseConsumer extends ScheduledBatchPollingConsumer implements 
     protected int poll() throws Exception {
         lock.lock();
         try {
-            if (endpoint.getStatement() != null) {
+            if (useSqlQuery) {
                 return pollWithSqlQuery();
             } else {
                 return pollWithView();
@@ -147,7 +161,7 @@ public class CouchbaseConsumer extends ScheduledBatchPollingConsumer implements 
         QueryOptions queryOptions = QueryOptions.queryOptions()
                 .scanConsistency(QueryScanConsistency.REQUEST_PLUS);
 
-        QueryResult result = scope.query(endpoint.getStatement(), queryOptions);
+        QueryResult result = scope.query(sqlStatement, queryOptions);
 
         forceConsumerAsReady();
 

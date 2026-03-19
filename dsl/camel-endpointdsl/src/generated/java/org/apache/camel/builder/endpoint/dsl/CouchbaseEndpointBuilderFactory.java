@@ -350,7 +350,9 @@ public interface CouchbaseEndpointBuilderFactory {
          * consumer uses SQL queries instead of MapReduce views. The query
          * should select META().id AS __id to identify documents. Example:
          * SELECT META().id AS __id, FROM myCollection WHERE type = 'order'
-         * LIMIT 100.
+         * LIMIT 100. If not set and useView is false, a SQL query is
+         * auto-generated from the bucket, scope, collection, limit, skip,
+         * descending, rangeStartKey, and rangeEndKey options.
          * 
          * The option is a: <code>java.lang.String</code> type.
          * 
@@ -361,6 +363,40 @@ public interface CouchbaseEndpointBuilderFactory {
          */
         default CouchbaseEndpointConsumerBuilder statement(String statement) {
             doSetProperty("statement", statement);
+            return this;
+        }
+        /**
+         * If true, use the deprecated MapReduce Views to query documents via
+         * designDocumentName and viewName. If false (default), use SQL queries
+         * instead.
+         * 
+         * The option is a: <code>boolean</code> type.
+         * 
+         * Default: false
+         * Group: consumer
+         * 
+         * @param useView the value to set
+         * @return the dsl builder
+         */
+        default CouchbaseEndpointConsumerBuilder useView(boolean useView) {
+            doSetProperty("useView", useView);
+            return this;
+        }
+        /**
+         * If true, use the deprecated MapReduce Views to query documents via
+         * designDocumentName and viewName. If false (default), use SQL queries
+         * instead.
+         * 
+         * The option will be converted to a <code>boolean</code> type.
+         * 
+         * Default: false
+         * Group: consumer
+         * 
+         * @param useView the value to set
+         * @return the dsl builder
+         */
+        default CouchbaseEndpointConsumerBuilder useView(String useView) {
+            doSetProperty("useView", useView);
             return this;
         }
         /**

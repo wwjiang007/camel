@@ -405,8 +405,13 @@ The `designDocumentName` and `viewName` endpoint options are now deprecated. Map
 deprecated in Couchbase Server 7.0 and do not work with the Magma storage backend (default since
 Couchbase Server 8.0).
 
-A new `statement` endpoint option has been added to support SQL++ (N1QL) queries as the recommended
-alternative. See the component documentation for migration guidance.
+The consumer now defaults to SQL++ (N1QL) queries instead of MapReduce Views. A new `statement`
+endpoint option allows providing explicit SQL++ queries. When no `statement` is set and `useView` is
+`false` (the default), the consumer auto-generates a SQL++ query from the endpoint options
+(`bucket`, `collection`, `limit`, `skip`, `descending`, `rangeStartKey`, `rangeEndKey`).
+
+To continue using the deprecated MapReduce Views, set `useView=true` explicitly. See the component
+documentation for migration guidance.
 
 === camel-ftp
 

@@ -100,6 +100,8 @@ public class CouchbaseEndpointConfigurer extends PropertyConfigurerSupport imple
         case "timeUnit": target.setTimeUnit(property(camelContext, java.util.concurrent.TimeUnit.class, value)); return true;
         case "usefixeddelay":
         case "useFixedDelay": target.setUseFixedDelay(property(camelContext, boolean.class, value)); return true;
+        case "useview":
+        case "useView": target.setUseView(property(camelContext, boolean.class, value)); return true;
         case "username": target.setUsername(property(camelContext, java.lang.String.class, value)); return true;
         case "viewname":
         case "viewName": target.setViewName(property(camelContext, java.lang.String.class, value)); return true;
@@ -187,6 +189,8 @@ public class CouchbaseEndpointConfigurer extends PropertyConfigurerSupport imple
         case "timeUnit": return java.util.concurrent.TimeUnit.class;
         case "usefixeddelay":
         case "useFixedDelay": return boolean.class;
+        case "useview":
+        case "useView": return boolean.class;
         case "username": return java.lang.String.class;
         case "viewname":
         case "viewName": return java.lang.String.class;
@@ -275,6 +279,8 @@ public class CouchbaseEndpointConfigurer extends PropertyConfigurerSupport imple
         case "timeUnit": return target.getTimeUnit();
         case "usefixeddelay":
         case "useFixedDelay": return target.isUseFixedDelay();
+        case "useview":
+        case "useView": return target.isUseView();
         case "username": return target.getUsername();
         case "viewname":
         case "viewName": return target.getViewName();
