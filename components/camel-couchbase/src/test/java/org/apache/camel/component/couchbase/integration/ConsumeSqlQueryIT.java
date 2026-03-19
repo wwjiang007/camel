@@ -23,7 +23,9 @@ import com.couchbase.client.java.Cluster;
 import com.couchbase.client.java.manager.bucket.BucketSettings;
 import com.couchbase.client.java.manager.bucket.BucketType;
 import com.couchbase.client.java.manager.query.CreatePrimaryQueryIndexOptions;
+import org.apache.camel.Exchange;
 import org.apache.camel.builder.RouteBuilder;
+import org.apache.camel.component.couchbase.CouchbaseConstants;
 import org.apache.camel.component.mock.MockEndpoint;
 import org.apache.camel.test.infra.common.TestUtils;
 import org.apache.camel.test.infra.couchbase.services.CouchbaseService;
@@ -38,6 +40,9 @@ import org.junit.jupiter.api.Tags;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.DisabledIfSystemProperty;
 import org.junit.jupiter.api.extension.RegisterExtension;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @DisabledIfSystemProperty(named = "ci.env.name", matches = ".*",
                           disabledReason = "Too resource intensive for most systems to run reliably")
@@ -79,11 +84,33 @@ public class ConsumeSqlQueryIT extends CamelTestSupport {
     }
 
     @Test
-    public void testConsumeWithSqlQuery() throws Exception {
-        MockEndpoint mock = getMockEndpoint("mock:result");
-        mock.expectedMessageCount(10);
+    public void testConsumeWithSqlQueryAndFullDocument() throws Exception {
+        MockEndpoint mock = getMockEndpoint("mock:fullDoc");
+        mock.expectedMinimumMessageCount(10);
 
         MockEndpoint.assertIsSatisfied(context, 30, TimeUnit.SECONDS);
+
+        // Verify headers are set correctly
+        for (Exchange exchange : mock.getReceivedExchanges()) {
+            String id = exchange.getIn().getHeader(CouchbaseConstants.HEADER_ID, String.class);
+            assertNotNull(id, "Document ID header should be set");
+            assertTrue(id.startsWith("DocumentID_"), "Document ID should match inserted documents");
+        }
+    }
+
+    @Test
+    public void testConsumeWithSqlQueryRawResult() throws Exception {
+        MockEndpoint mock = getMockEndpoint("mock:raw");
+        mock.expectedMinimumMessageCount(5);
+
+        MockEndpoint.assertIsSatisfied(context, 30, TimeUnit.SECONDS);
+
+        // With fullDocument=false, body should be the SQL++ query result row (a JSON string)
+        for (Exchange exchange : mock.getReceivedExchanges()) {
+            Object body = exchange.getIn().getBody();
+            assertNotNull(body, "Body should not be null");
+            assertTrue(body instanceof String, "Body should be a String (JSON row)");
+        }
     }
 
     @AfterEach
@@ -107,10 +134,15 @@ public class ConsumeSqlQueryIT extends CamelTestSupport {
         return new RouteBuilder() {
             @Override
             public void configure() {
-                String query = "SELECT META().id AS __id, * FROM `" + bucketName + "` LIMIT 10";
-                from(getConnectionUri() + "&statement=" + query)
-                        .log("message received via SQL++")
-                        .to("mock:result");
+                // SQL++ with fullDocument=true (default) — fetches complete document via KV get
+                String fullDocQuery = "SELECT META().id AS __id, * FROM `" + bucketName + "` LIMIT 10";
+                from(getConnectionUri() + "&statement=" + fullDocQuery)
+                        .to("mock:fullDoc");
+
+                // SQL++ with fullDocument=false — uses raw query result row as body
+                String rawQuery = "SELECT META().id AS __id, * FROM `" + bucketName + "` LIMIT 5";
+                from(getConnectionUri() + "&statement=" + rawQuery + "&fullDocument=false")
+                        .to("mock:raw");
             }
         };
     }
