@@ -24,21 +24,16 @@ import org.apache.camel.test.AvailablePortFinder;
  */
 public final class ITestSupport {
 
-    static final int PORT1;
-    static final int PORT2;
-    static final int PORT3;
-    static final int PORT4;
+    private static final AvailablePortFinder.Port P1 = AvailablePortFinder.find();
+    private static final AvailablePortFinder.Port P2 = AvailablePortFinder.find();
+    private static final AvailablePortFinder.Port P3 = AvailablePortFinder.find();
+    private static final AvailablePortFinder.Port P4 = AvailablePortFinder.find();
+    static final int PORT1 = P1.getPort();
+    static final int PORT2 = P2.getPort();
+    static final int PORT3 = P3.getPort();
+    static final int PORT4 = P4.getPort();
 
     static {
-        try (AvailablePortFinder.Port p1 = AvailablePortFinder.find();
-             AvailablePortFinder.Port p2 = AvailablePortFinder.find();
-             AvailablePortFinder.Port p3 = AvailablePortFinder.find();
-             AvailablePortFinder.Port p4 = AvailablePortFinder.find()) {
-            PORT1 = p1.getPort();
-            PORT2 = p2.getPort();
-            PORT3 = p3.getPort();
-            PORT4 = p4.getPort();
-        }
         //set them as system properties so Spring can use the property placeholder
         //things to set them into the URL's in the spring contexts
         System.setProperty("ITestSupport.port1", Integer.toString(PORT1));
@@ -51,10 +46,8 @@ public final class ITestSupport {
     }
 
     public static int getPort(String name) {
-        int port;
-        try (AvailablePortFinder.Port p = AvailablePortFinder.find()) {
-            port = p.getPort();
-        }
+        AvailablePortFinder.Port p = AvailablePortFinder.find();
+        int port = p.getPort();
         System.setProperty(name, Integer.toString(port));
         return port;
     }

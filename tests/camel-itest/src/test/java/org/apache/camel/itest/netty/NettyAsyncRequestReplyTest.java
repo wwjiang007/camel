@@ -29,6 +29,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.jms.JmsComponent;
 import org.apache.camel.itest.utils.extensions.JmsServiceExtension;
 import org.apache.camel.spi.Registry;
+import org.apache.camel.test.AvailablePortFinder;
 import org.apache.camel.test.junit6.CamelTestSupport;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -48,9 +49,12 @@ public class NettyAsyncRequestReplyTest extends CamelTestSupport {
     @RegisterExtension
     public static JmsServiceExtension jmsServiceExtension = JmsServiceExtension.createExtension();
 
+    @RegisterExtension
+    static AvailablePortFinder.Port portFinder = AvailablePortFinder.find();
+
     private static final Logger LOG = LoggerFactory.getLogger(NettyAsyncRequestReplyTest.class);
 
-    private int port;
+    private int port = portFinder.getPort();
 
     @Test
     void testNetty() {

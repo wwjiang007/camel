@@ -38,10 +38,8 @@ public class JettyRecipientListCxfIssueTest extends CamelSpringTestSupport {
     @RegisterExtension
     static AvailablePortFinder.Port port1 = AvailablePortFinder.find();
     @RegisterExtension
-
     static AvailablePortFinder.Port port2 = AvailablePortFinder.find();
     @RegisterExtension
-
     static AvailablePortFinder.Port port3 = AvailablePortFinder.find();
     static {
         //set them as system properties so Spring can use the property placeholder

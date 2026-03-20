@@ -21,6 +21,7 @@ import org.apache.camel.builder.RouteBuilder;
 import org.apache.camel.component.jms.JmsComponent;
 import org.apache.camel.itest.utils.extensions.JmsServiceExtension;
 import org.apache.camel.spi.Registry;
+import org.apache.camel.test.AvailablePortFinder;
 import org.apache.camel.test.junit6.CamelTestSupport;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
@@ -41,7 +42,9 @@ public class JmsHttpPostIssueTest extends CamelTestSupport {
     @RegisterExtension
     public static JmsServiceExtension jmsServiceExtension = JmsServiceExtension.createExtension();
 
-    private int port;
+    @RegisterExtension
+    static AvailablePortFinder.Port portFinder = AvailablePortFinder.find();
+    private int port = portFinder.getPort();
 
     @Test
     void testJmsInOnlyHttpPostIssue() {

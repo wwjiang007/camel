@@ -37,13 +37,10 @@ public class JettySimulateFailoverRoundRobinTest extends CamelTestSupport {
     @RegisterExtension
     static AvailablePortFinder.Port port1 = AvailablePortFinder.find();
     @RegisterExtension
-
     static AvailablePortFinder.Port port2 = AvailablePortFinder.find();
     @RegisterExtension
-
     static AvailablePortFinder.Port port3 = AvailablePortFinder.find();
     @RegisterExtension
-
     static AvailablePortFinder.Port port4 = AvailablePortFinder.find();
 
     private String bad = "jetty:http://localhost:" + port1.getPort() + "/bad";

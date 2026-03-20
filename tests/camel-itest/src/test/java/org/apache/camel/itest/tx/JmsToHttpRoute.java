@@ -46,9 +46,8 @@ public class JmsToHttpRoute extends RouteBuilder {
 
     @Override
     public void configure() {
-        try (AvailablePortFinder.Port p = AvailablePortFinder.find()) {
-            port = p.getPort();
-        }
+        AvailablePortFinder.Port p = AvailablePortFinder.find();
+        port = p.getPort();
 
         // configure a global transacted error handler
         errorHandler(transactionErrorHandler(required));

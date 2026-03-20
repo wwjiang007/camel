@@ -33,10 +33,10 @@ public class GreeterServiceExtension implements BeforeAllCallback, AfterAllCallb
     private static final String ADDRESS;
     private static final int PORT;
 
+    private static final AvailablePortFinder.Port PORT_HOLDER;
     static {
-        try (AvailablePortFinder.Port p = AvailablePortFinder.find()) {
-            PORT = p.getPort();
-        }
+        PORT_HOLDER = AvailablePortFinder.find();
+        PORT = PORT_HOLDER.getPort();
         GREETER = new GreeterImpl();
 
         ADDRESS = "http://localhost:" + PORT + "/SoapContext/SoapPort";
