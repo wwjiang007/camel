@@ -18,7 +18,6 @@ package org.apache.camel.component.as2.api;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -441,13 +440,11 @@ public class AS2ServerConnection {
             this.service = service;
 
             if (sslContext == null) {
-                serversocket = new ServerSocket();
+                serversocket = new ServerSocket(port);
             } else {
                 SSLServerSocketFactory factory = sslContext.getServerSocketFactory();
-                serversocket = factory.createServerSocket();
+                serversocket = factory.createServerSocket(port);
             }
-            serversocket.setReuseAddress(true);
-            serversocket.bind(new InetSocketAddress(port));
         }
 
         @Override

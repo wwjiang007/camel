@@ -18,7 +18,6 @@ package org.apache.camel.component.as2.api;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
@@ -124,13 +123,11 @@ public class AS2AsyncMDNServerConnection {
         public RequestListenerThread(int port, SSLContext sslContext) throws IOException {
             setName(REQUEST_LISTENER_THREAD_NAME_PREFIX + port);
             if (sslContext == null) {
-                serverSocket = new ServerSocket();
+                serverSocket = new ServerSocket(port);
             } else {
                 SSLServerSocketFactory factory = sslContext.getServerSocketFactory();
-                serverSocket = factory.createServerSocket();
+                serverSocket = factory.createServerSocket(port);
             }
-            serverSocket.setReuseAddress(true);
-            serverSocket.bind(new InetSocketAddress(port));
             HttpProcessor httpProcessor = HttpProcessorBuilder.create()
                     .add(new ResponseContent(true))
                     .add(new ResponseDate())
