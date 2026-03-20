@@ -56,7 +56,7 @@ public class TelegramWebhookRegistrationTest extends TelegramTestSupport {
                     .until(() -> {
                         HttpClient client = HttpClient.newBuilder().build();
                         HttpRequest request = HttpRequest.newBuilder()
-                                .uri(URI.create("http://localhost:" + port + "/botmock-token/getTest")).GET().build();
+                                .uri(URI.create("http://localhost:" + port.getPort() + "/botmock-token/getTest")).GET().build();
 
                         final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
                         return response.statusCode() == 200;
@@ -98,7 +98,7 @@ public class TelegramWebhookRegistrationTest extends TelegramTestSupport {
                     .until(() -> {
                         HttpClient client = HttpClient.newBuilder().build();
                         HttpRequest request = HttpRequest.newBuilder()
-                                .uri(URI.create("http://localhost:" + port + "/botmock-token/getTest")).GET().build();
+                                .uri(URI.create("http://localhost:" + port.getPort() + "/botmock-token/getTest")).GET().build();
 
                         final HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
                         return response.statusCode() == 200;

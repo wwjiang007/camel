@@ -32,8 +32,6 @@ import org.junit.jupiter.api.Test;
  */
 public class TelegramWebhookCallTest extends TelegramTestSupport {
 
-    private int port;
-
     @Test
     public void testWebhookCall() throws Exception {
         WebhookConfiguration config
@@ -51,17 +49,13 @@ public class TelegramWebhookCallTest extends TelegramTestSupport {
     }
 
     @Override
-    protected void doPreSetup() {
-    }
-
-    @Override
     protected RoutesBuilder createRouteBuilder() {
         return new RouteBuilder() {
             @Override
             public void configure() {
                 restConfiguration()
                         .host("localhost")
-                        .port(port);
+                        .port(port.getPort());
 
                 from("webhook:telegram:bots?authorizationToken=mock-token&webhookAutoRegister=false")
                         .id("webhook")
