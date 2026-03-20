@@ -33,8 +33,6 @@ import org.apache.thrift.server.TServer;
 import org.apache.thrift.server.TThreadPoolServer;
 import org.apache.thrift.transport.TServerSocket;
 import org.apache.thrift.transport.TZlibTransport;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
@@ -59,9 +57,9 @@ public class ThriftProducerZlibCompressionTest extends CamelTestSupport {
     private static final int THRIFT_TEST_NUM2 = 13;
     private static final int THRIFT_CLIENT_TIMEOUT = 2000;
 
-    @BeforeEach
+    @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public void startThriftServer() throws Exception {
+    protected void setupResources() throws Exception {
         processor = new Calculator.Processor(new CalculatorSyncServerImpl());
 
         serverTransport = new TServerSocket(
@@ -81,8 +79,8 @@ public class ThriftProducerZlibCompressionTest extends CamelTestSupport {
         new Thread(simple).start();
     }
 
-    @AfterEach
-    public void stopThriftServer() {
+    @Override
+    protected void cleanupResources() throws Exception {
         if (server != null) {
             server.stop();
             serverTransport.close();

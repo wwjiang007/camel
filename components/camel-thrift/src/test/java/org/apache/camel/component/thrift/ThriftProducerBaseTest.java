@@ -24,8 +24,6 @@ import org.apache.thrift.server.THsHaServer;
 import org.apache.thrift.server.THsHaServer.Args;
 import org.apache.thrift.server.TServer;
 import org.apache.thrift.transport.TNonblockingServerSocket;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -42,9 +40,9 @@ public abstract class ThriftProducerBaseTest extends CamelTestSupport {
     private TNonblockingServerSocket serverTransport;
     private TServer server;
 
-    @BeforeEach
+    @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public void startThriftServer() throws Exception {
+    protected void setupResources() throws Exception {
         processor = new Calculator.Processor(new CalculatorSyncServerImpl());
         serverTransport = new TNonblockingServerSocket(thriftTestPort.getPort());
         server = new THsHaServer(new Args(serverTransport).processor(processor));
@@ -57,8 +55,8 @@ public abstract class ThriftProducerBaseTest extends CamelTestSupport {
         new Thread(simple).start();
     }
 
-    @AfterEach
-    public void stopThriftServer() {
+    @Override
+    protected void cleanupResources() throws Exception {
         if (server != null) {
             server.stop();
             serverTransport.close();

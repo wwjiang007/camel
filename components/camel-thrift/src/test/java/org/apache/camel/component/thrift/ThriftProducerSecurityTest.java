@@ -40,8 +40,6 @@ import org.apache.thrift.server.TServer;
 import org.apache.thrift.server.TThreadPoolServer;
 import org.apache.thrift.transport.TSSLTransportFactory;
 import org.apache.thrift.transport.TServerSocket;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
@@ -71,9 +69,9 @@ public class ThriftProducerSecurityTest extends CamelTestSupport {
     private static final String SECURITY_STORE_PASSWORD = "camelinaction";
     private static final int THRIFT_CLIENT_TIMEOUT = 2000;
 
-    @BeforeEach
+    @Override
     @SuppressWarnings({ "unchecked", "rawtypes" })
-    public void startThriftServer() throws Exception {
+    protected void setupResources() throws Exception {
         processor = new Calculator.Processor(new CalculatorSyncServerImpl());
 
         TSSLTransportFactory.TSSLTransportParameters sslParams = new TSSLTransportFactory.TSSLTransportParameters();
@@ -94,8 +92,8 @@ public class ThriftProducerSecurityTest extends CamelTestSupport {
         new Thread(simple).start();
     }
 
-    @AfterEach
-    public void stopThriftServer() {
+    @Override
+    protected void cleanupResources() throws Exception {
         if (server != null) {
             server.stop();
             serverTransport.close();
