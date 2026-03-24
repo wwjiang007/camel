@@ -16,10 +16,15 @@
  */
 package org.apache.camel.dsl.jbang.core.commands;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
+import org.apache.camel.catalog.CamelCatalog;
+import org.apache.camel.catalog.DefaultCamelCatalog;
 import org.apache.camel.util.HomeHelper;
 import org.jline.builtins.ClasspathResourceUtil;
 import org.jline.builtins.ConfigurationPath;
@@ -104,6 +109,9 @@ public class Shell extends CamelCommand {
             String prompt = "camel> ";
             String rightPrompt = null;
 
+            // print context-aware banner
+            printBanner(terminal);
+
             // start the shell and process input until the user quits with Ctrl-C or Ctrl-D
             String line;
             boolean run = true;
@@ -127,6 +135,46 @@ public class Shell extends CamelCommand {
             TerminalBuilder.setTerminalOverride(null);
         }
         return 0;
+    }
+
+    private void printBanner(Terminal terminal) {
+        CamelCatalog catalog = new DefaultCamelCatalog();
+        String version = catalog.getCatalogVersion();
+        terminal.writer().println("Apache Camel JBang Shell v" + version);
+
+        // detect route files in current directory
+        int routeCount = countRouteFiles();
+        if (routeCount == 0) {
+            terminal.writer().println("No routes found in current directory.");
+            terminal.writer().println("  Quick start:  init MyRoute.yaml && run *");
+            terminal.writer().println("  Templates:    init --list");
+            terminal.writer().println("  Docs:         doc <component>");
+            terminal.writer().println("  Need help?    help");
+        } else {
+            terminal.writer().printf("Found %d route file(s) in current directory.%n", routeCount);
+            terminal.writer().println("  Run:   run *");
+            terminal.writer().println("  Watch: run * --dev");
+        }
+        terminal.writer().println();
+        terminal.writer().flush();
+    }
+
+    private static int countRouteFiles() {
+        int count = 0;
+        try (Stream<Path> files = Files.list(Paths.get("."))) {
+            count = (int) files.filter(Files::isRegularFile)
+                    .filter(p -> {
+                        String name = p.getFileName().toString();
+                        return name.endsWith(".yaml") && !name.endsWith(".kamelet.yaml")
+                                && !name.equals("application.yaml")
+                                || name.endsWith(".xml") && !name.equals("pom.xml")
+                                || name.endsWith(".java");
+                    })
+                    .count();
+        } catch (IOException e) {
+            // ignore
+        }
+        return count;
     }
 
     private static class ReplHighlighter extends DefaultHighlighter {
