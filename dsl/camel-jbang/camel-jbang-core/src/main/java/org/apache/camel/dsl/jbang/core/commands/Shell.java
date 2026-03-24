@@ -147,8 +147,10 @@ public class Shell extends CamelCommand {
         if (routeCount == 0) {
             terminal.writer().println("No routes found in current directory.");
             terminal.writer().println("  Quick start:  init MyRoute.yaml && run *");
+            terminal.writer().println("  Examples:     run --example timer-log");
             terminal.writer().println("  Templates:    init --list");
             terminal.writer().println("  Docs:         doc <component>");
+            terminal.writer().println("  AI scaffold:  plugin add kit");
             terminal.writer().println("  Need help?    help");
         } else {
             terminal.writer().printf("Found %d route file(s) in current directory.%n", routeCount);
