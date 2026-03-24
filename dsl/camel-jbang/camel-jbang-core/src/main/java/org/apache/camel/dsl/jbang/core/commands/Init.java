@@ -297,8 +297,9 @@ public class Init extends CamelCommand {
                 new String[] { "kamelet-source.yaml", "Kamelet source connector", ".kamelet.yaml" },
                 new String[] { "kamelet-sink.yaml", "Kamelet sink connector", ".kamelet.yaml" },
                 new String[] { "kamelet-action.yaml", "Kamelet action processor", ".kamelet.yaml" }));
-        categories.put("Pipes and CRs", List.of(
-                new String[] { "init-pipe.yaml", "Pipe CR (source to sink)", ".yaml" }));
+        List<String[]> pipeTemplates = new ArrayList<>();
+        pipeTemplates.add(new String[] { "init-pipe.yaml", "Pipe CR (source to sink)", ".yaml" });
+        categories.put("Pipes and CRs", pipeTemplates);
 
         Scanner scanner = new Scanner(System.in);
 
