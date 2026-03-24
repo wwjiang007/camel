@@ -390,11 +390,19 @@ public class Run extends CamelCommand {
         return 0;
     }
 
+    private static final List<String> EXAMPLE_NAMES = List.of("timer-log", "rest-api", "cron-log");
+
     private int runExample() throws Exception {
         String resourcePath = "examples/" + example + ".yaml";
         InputStream is = Run.class.getClassLoader().getResourceAsStream(resourcePath);
         if (is == null) {
-            printer().printErr("Unknown example: " + example);
+            List<String> suggestions
+                    = org.apache.camel.main.util.SuggestSimilarHelper.didYouMean(EXAMPLE_NAMES, example);
+            if (!suggestions.isEmpty()) {
+                printer().printErr("Unknown example: " + example + ". Did you mean? " + String.join(", ", suggestions));
+            } else {
+                printer().printErr("Unknown example: " + example);
+            }
             printer().printErr("Run 'camel run --example-list' to see available examples.");
             return 1;
         }
