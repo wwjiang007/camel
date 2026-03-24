@@ -18,6 +18,7 @@ package org.apache.camel.dsl.jbang.core.commands;
 
 import java.io.File;
 import java.net.HttpURLConnection;
+import java.net.ServerSocket;
 import java.net.URI;
 
 import org.apache.camel.catalog.CamelCatalog;
@@ -93,6 +94,8 @@ public class Doctor extends CamelCommand {
             Process p = new ProcessBuilder("docker", "info")
                     .redirectErrorStream(true)
                     .start();
+            // drain output to prevent blocking
+            p.getInputStream().transferTo(java.io.OutputStream.nullOutputStream());
             int exit = p.waitFor();
             printer().printf("  Docker:      %s%n", exit == 0 ? "running (OK)" : "not running");
         } catch (Exception e) {
@@ -118,7 +121,7 @@ public class Doctor extends CamelCommand {
     }
 
     private static boolean isPortInUse(int port) {
-        try (java.net.ServerSocket ss = new java.net.ServerSocket(port)) {
+        try (ServerSocket ss = new ServerSocket(port)) {
             ss.setReuseAddress(true);
             return false;
         } catch (Exception e) {

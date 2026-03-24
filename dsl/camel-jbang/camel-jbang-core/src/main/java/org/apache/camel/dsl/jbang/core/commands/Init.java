@@ -311,9 +311,15 @@ public class Init extends CamelCommand {
         }
         printer().print("Choice [1]: ");
         String categoryInput = scanner.nextLine().trim();
-        int categoryIdx = categoryInput.isEmpty() ? 0 : Integer.parseInt(categoryInput) - 1;
+        int categoryIdx;
+        try {
+            categoryIdx = categoryInput.isEmpty() ? 0 : Integer.parseInt(categoryInput) - 1;
+        } catch (NumberFormatException e) {
+            printer().printErr("Invalid choice: " + categoryInput);
+            return 1;
+        }
         if (categoryIdx < 0 || categoryIdx >= categoryNames.size()) {
-            printer().printErr("Invalid choice.");
+            printer().printErr("Invalid choice: must be between 1 and " + categoryNames.size());
             return 1;
         }
 
@@ -327,9 +333,15 @@ public class Init extends CamelCommand {
         }
         printer().print("Choice [1]: ");
         String templateInput = scanner.nextLine().trim();
-        int templateIdx = templateInput.isEmpty() ? 0 : Integer.parseInt(templateInput) - 1;
+        int templateIdx;
+        try {
+            templateIdx = templateInput.isEmpty() ? 0 : Integer.parseInt(templateInput) - 1;
+        } catch (NumberFormatException e) {
+            printer().printErr("Invalid choice: " + templateInput);
+            return 1;
+        }
         if (templateIdx < 0 || templateIdx >= templates.size()) {
-            printer().printErr("Invalid choice.");
+            printer().printErr("Invalid choice: must be between 1 and " + templates.size());
             return 1;
         }
 
