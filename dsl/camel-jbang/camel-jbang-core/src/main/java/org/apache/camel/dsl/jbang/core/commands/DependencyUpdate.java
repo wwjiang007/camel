@@ -107,8 +107,16 @@ public class DependencyUpdate extends DependencyList {
             return -1;
         }
 
+        // validate that all update targets are of the same type (all Maven or all JBang)
+        boolean hasMaven = updateTargets.stream().anyMatch(f -> "pom.xml".equals(f.getFileName().toString()));
+        boolean hasJava = updateTargets.stream().anyMatch(f -> !"pom.xml".equals(f.getFileName().toString()));
+        if (hasMaven && hasJava) {
+            printer().printErr("Cannot mix pom.xml and Java source files as update targets");
+            return -1;
+        }
+
         Path firstTarget = updateTargets.get(0);
-        boolean maven = "pom.xml".equals(firstTarget.getFileName().toString());
+        boolean maven = hasMaven;
 
         if (clean && !maven) {
             // in clean mode: remove all DEPS first
@@ -331,7 +339,10 @@ public class DependencyUpdate extends DependencyList {
     }
 
     /**
-     * Check if a dependency GAV string is a Camel dependency (org.apache.camel group).
+     * Check if a JBang dependency GAV string is a Camel dependency. Uses exact prefix "org.apache.camel:" (with colon)
+     * because JBang files only use the org.apache.camel group (not springboot/quarkus variants). For Maven pom.xml, see
+     * syncMavenSource which uses startsWith("org.apache.camel") without colon to also match org.apache.camel.springboot
+     * and org.apache.camel.quarkus groups.
      */
     private static boolean isCamelDependency(String dep) {
         // handle @pom suffix
@@ -444,7 +455,7 @@ public class DependencyUpdate extends DependencyList {
             }
         }
 
-        if (!toBeUpdated.isEmpty()) {
+        if (!toBeUpdated.isEmpty() && targetLineNumber > 0) {
             String content = IOHelper.loadText(Files.newInputStream(file));
             String[] lines = content.split("\n");
             content = insertMavenDeps(lines, toBeUpdated, targetLineNumber);
@@ -593,6 +604,7 @@ public class DependencyUpdate extends DependencyList {
         }
 
         StringBuilder sb = new StringBuilder();
+        boolean previousSkipped = false;
         for (int i = 0; i < lines.length; i++) {
             int lineNum = i + 1; // 1-based
             boolean skip = false;
@@ -603,11 +615,17 @@ public class DependencyUpdate extends DependencyList {
                 }
             }
             if (!skip) {
+                // skip blank line immediately following a removed block to avoid double-blank-lines
+                if (previousSkipped && lines[i].trim().isEmpty()) {
+                    previousSkipped = false;
+                    continue;
+                }
                 if (sb.length() > 0) {
                     sb.append("\n");
                 }
                 sb.append(lines[i]);
             }
+            previousSkipped = skip;
         }
         return sb.toString();
     }
