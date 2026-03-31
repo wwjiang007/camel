@@ -20,7 +20,6 @@ import java.io.File;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.stream.Stream;
@@ -47,8 +46,7 @@ class DependencyUpdateTest extends CamelCommandBaseTestSupport {
     @Override
     public void setup() throws Exception {
         super.setup();
-        Path base = Paths.get("target");
-        workingDir = Files.createTempDirectory(base, "camel-dependency-update-tests").toFile();
+        workingDir = Files.createTempDirectory("camel-dependency-update-tests").toFile();
     }
 
     @AfterEach

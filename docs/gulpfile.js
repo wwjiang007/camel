@@ -207,7 +207,7 @@ const sources = {
         '../core/camel-main/src/main/docs/!(*-component|*-language|*-dataformat|*-summary).adoc',
         '../components/{*,*/*}/src/main/docs/!(*-component|*-language|*-dataformat|*-summary).adoc',
         '../dsl/src/main/docs/!(*-component|*-language|*-dataformat|*-summary).adoc',
-        '../dsl/{*,*/!(target)}/src/main/docs/!(*-component|*-language|*-dataformat|*-summary).adoc',
+        '../dsl/{*,*/!(target|.camel-jbang*)}/src/main/docs/!(*-component|*-language|*-dataformat|*-summary).adoc',
       ],
       destination: 'components/modules/others/pages',
       keep: [
@@ -327,7 +327,7 @@ const tasks = Array.from(sourcesMap).flatMap(([type, definition]) => {
       }
     })
 
-    return gulp.src(source, { ignore: ['**/target/**'], strict: false })
+    return gulp.src(source, { ignore: ['**/target/**'] })
       .pipe(filterFn)
       .pipe(
         map((file, done) => {
@@ -410,7 +410,7 @@ const tasks = Array.from(sourcesMap).flatMap(([type, definition]) => {
       return done()
     }
 
-    return gulp.src(source, { ignore: ['**/target/**'], strict: false }) // asciidoc files
+    return gulp.src(source, { ignore: ['**/target/**'] }) // asciidoc files
       .pipe(through2.obj(extractExamples)) // extracted example files
       // symlink links from a fixed directory, i.e. we could link to
       // the example files from `destination`, that would not work for
