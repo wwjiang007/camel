@@ -241,7 +241,7 @@ public class KubernetesExport extends Export {
         } else {
             runtimeVersion = camelVersion;
         }
-        CamelCatalog catalog = CatalogHelper.loadCatalog(runtime, runtimeVersion, download);
+        CamelCatalog catalog = CatalogHelper.loadCatalog(runtime, runtimeVersion, repositories, quarkusGroupId, download);
 
         List<Source> sources;
         try {
