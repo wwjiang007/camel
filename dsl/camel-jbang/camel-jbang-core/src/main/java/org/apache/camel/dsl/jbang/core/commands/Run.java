@@ -1000,8 +1000,18 @@ public class Run extends CamelCommand {
         addRuntimeSpecificDependenciesFromProperties(profileProperties);
 
         // Add plugin dependencies
+        Map<String, Plugin> activePlugins = Collections.emptyMap();
         if (!skipPlugins) {
-            Set<PluginExporter> exporters = PluginHelper.getActivePlugins(getMain(), repositories).values()
+            activePlugins = PluginHelper.getActivePlugins(getMain(), repositories);
+
+            // Let plugins customize the run environment (e.g., set config directories)
+            // before plugin exporter dependencies are added, so exporters can scan the right locations
+            for (Plugin plugin : activePlugins.values()) {
+                plugin.getRunCustomizer()
+                        .ifPresent(customizer -> customizer.beforeRun(main, Collections.unmodifiableList(files)));
+            }
+
+            Set<PluginExporter> exporters = activePlugins.values()
                     .stream()
                     .map(Plugin::getExporter)
                     .filter(Optional::isPresent)
