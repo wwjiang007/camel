@@ -17,13 +17,15 @@
 package org.apache.camel.dsl.jbang.core.commands;
 
 import java.io.File;
-import java.net.HttpURLConnection;
 import java.net.ServerSocket;
-import java.net.URI;
+import java.util.List;
+import java.util.Set;
 
 import org.apache.camel.catalog.CamelCatalog;
 import org.apache.camel.catalog.DefaultCamelCatalog;
 import org.apache.camel.dsl.jbang.core.common.VersionHelper;
+import org.apache.camel.tooling.maven.MavenDownloaderImpl;
+import org.apache.camel.tooling.maven.MavenResolutionException;
 import picocli.CommandLine.Command;
 
 @Command(name = "doctor", description = "Checks the environment and reports potential issues",
@@ -43,8 +45,8 @@ public class Doctor extends CamelCommand {
         checkJava();
         checkJBang();
         checkCamelVersion();
-        checkMavenCentral();
-        checkDocker();
+        checkMavenRepository();
+        checkContainerRuntime();
         checkCommonPorts();
         checkDiskSpace();
 
@@ -74,33 +76,42 @@ public class Doctor extends CamelCommand {
         printer().printf("  Camel:       %s%n", version);
     }
 
-    private void checkMavenCentral() {
+    private void checkMavenRepository() {
+        MavenDownloaderImpl downloader = new MavenDownloaderImpl();
         try {
-            HttpURLConnection conn = (HttpURLConnection) URI.create("https://repo1.maven.org/maven2/")
-                    .toURL().openConnection();
-            conn.setConnectTimeout(5000);
-            conn.setReadTimeout(5000);
-            conn.setRequestMethod("HEAD");
-            int code = conn.getResponseCode();
-            conn.disconnect();
-            printer().printf("  Maven:       %s%n", code == 200 ? "reachable (OK)" : "returned " + code);
+            downloader.build();
+            CamelCatalog catalog = new DefaultCamelCatalog();
+            String version = catalog.getCatalogVersion();
+            downloader.resolveArtifacts(
+                    List.of("org.apache.camel:camel-api:" + version),
+                    Set.of(), false, false);
+            printer().printf("  Maven:       artifact resolution OK%n");
+        } catch (MavenResolutionException e) {
+            printer().printf("  Maven:       artifact resolution failed (%s)%n", e.getMessage());
         } catch (Exception e) {
-            printer().printf("  Maven:       unreachable (%s)%n", e.getMessage());
+            printer().printf("  Maven:       error (%s)%n", e.getMessage());
         }
     }
 
-    private void checkDocker() {
-        try {
-            Process p = new ProcessBuilder("docker", "info")
-                    .redirectErrorStream(true)
-                    .start();
-            // drain output to prevent blocking
-            p.getInputStream().transferTo(java.io.OutputStream.nullOutputStream());
-            int exit = p.waitFor();
-            printer().printf("  Docker:      %s%n", exit == 0 ? "running (OK)" : "not running");
-        } catch (Exception e) {
-            printer().printf("  Docker:      not found%n");
+    private void checkContainerRuntime() {
+        // check docker first, then podman as fallback
+        for (String cmd : new String[] { "docker", "podman" }) {
+            try {
+                Process p = new ProcessBuilder(cmd, "info")
+                        .redirectErrorStream(true)
+                        .start();
+                // drain output to prevent blocking
+                p.getInputStream().transferTo(java.io.OutputStream.nullOutputStream());
+                int exit = p.waitFor();
+                if (exit == 0) {
+                    printer().printf("  Container:   %s running (OK, optional)%n", cmd);
+                    return;
+                }
+            } catch (Exception e) {
+                // not found, try next
+            }
         }
+        printer().printf("  Container:   not found (optional — needed for test containers)%n");
     }
 
     private void checkCommonPorts() {
