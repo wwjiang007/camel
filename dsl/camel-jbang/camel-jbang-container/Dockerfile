@@ -19,8 +19,8 @@ FROM eclipse-temurin:21-jdk
 
 # Set Versions, JBang Path and commit ID of the specific version of dsl/camel-jbang/camel-jbang-main/dist/CamelJBang.java
 ENV JBANG_VERSION=0.137.0 \
-    CAMEL_VERSION=4.18.0 \
-    CAMEL_JBANG_COMMIT=dc24bdca6b963ce9166ef473681ba8a2cc7da11e \
+    CAMEL_VERSION=4.18.1 \
+    CAMEL_JBANG_COMMIT=64af361794701d04c69aa1489a78d65247c6bf9b \
     JBANG_PATH=/opt/jbang
 
 RUN mkdir $JBANG_PATH && chown ubuntu:ubuntu $JBANG_PATH
