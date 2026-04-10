@@ -1691,6 +1691,13 @@ public abstract class RedeliveryErrorHandler extends ErrorHandlerSupport
     }
 
     @Override
+    protected void doResume() throws Exception {
+        super.doResume();
+        // reset flag when resuming
+        preparingShutdown = false;
+    }
+
+    @Override
     protected void doShutdown() throws Exception {
         ServiceHelper.stopAndShutdownServices(deadLetter, output, outputAsync, taskFactory);
     }
