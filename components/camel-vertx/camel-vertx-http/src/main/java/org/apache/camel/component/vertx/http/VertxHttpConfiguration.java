@@ -52,7 +52,7 @@ public class VertxHttpConfiguration {
     private boolean throwExceptionOnFailure = true;
     @UriParam(label = "producer", defaultValue = "false")
     private boolean transferException;
-    @UriParam(label = "producer,security")
+    @UriParam(label = "advanced,security")
     private String deserializationFilter;
     @UriParam(label = "producer", defaultValue = "200-299")
     private String okStatusCodeRange = "200-299";
