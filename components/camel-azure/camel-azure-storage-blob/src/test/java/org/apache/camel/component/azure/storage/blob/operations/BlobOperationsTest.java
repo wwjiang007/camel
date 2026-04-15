@@ -32,6 +32,7 @@ import com.azure.core.http.rest.ResponseBase;
 import com.azure.storage.blob.models.BlobDownloadHeaders;
 import com.azure.storage.blob.models.BlobProperties;
 import com.azure.storage.blob.models.BlockBlobItem;
+import com.azure.storage.blob.specialized.BlobClientBase;
 import com.azure.storage.blob.specialized.BlobLeaseClient;
 import org.apache.camel.Exchange;
 import org.apache.camel.component.azure.storage.blob.BlobBlock;
@@ -203,6 +204,30 @@ class BlobOperationsTest extends CamelTestSupport {
 
         assertNotNull(response);
         assertTrue((boolean) response.getBody());
+    }
+
+    @Test
+    void testCreateBlobSnapshot() {
+        final String snapshotId = "2026-04-15T10:00:00.0000000Z";
+        final HttpHeaders httpHeaders = new HttpHeaders().set("x-test-header", "123");
+
+        final BlobClientBase snapshotClient = mock(BlobClientBase.class);
+        when(snapshotClient.getSnapshotId()).thenReturn(snapshotId);
+
+        when(client.createSnapshot(any(), any(), any()))
+                .thenReturn(new ResponseBase<>(null, 201, httpHeaders, snapshotClient, null));
+
+        final Exchange exchange = new DefaultExchange(context);
+
+        final BlobOperations operations = new BlobOperations(configuration, client);
+        final BlobOperationResponse response = operations.createBlobSnapshot(exchange);
+
+        assertNotNull(response);
+        assertEquals(snapshotId, response.getBody());
+        assertNotNull(response.getHeaders());
+        assertEquals(snapshotId, response.getHeaders().get(BlobConstants.BLOB_SNAPSHOT_ID));
+        assertEquals("123", ((HttpHeaders) response.getHeaders().get(BlobConstants.RAW_HTTP_HEADERS))
+                .get("x-test-header").getValue());
     }
 
     private BlobProperties createBlobProperties() {

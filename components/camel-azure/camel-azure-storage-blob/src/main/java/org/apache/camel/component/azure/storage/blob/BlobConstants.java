@@ -283,6 +283,10 @@ public final class BlobConstants {
               description = "(getChangeFeed) This gives additional context that is passed through the Http pipeline during the service call.",
               javaType = "Context")
     public static final String CHANGE_FEED_CONTEXT = HEADER_PREFIX + "Context";
+    @Metadata(label = "consumer",
+              description = "The snapshot identifier returned after creating a blob snapshot.",
+              javaType = "String")
+    public static final String BLOB_SNAPSHOT_ID = HEADER_PREFIX + "SnapshotId";
 
     private BlobConstants() {
     }

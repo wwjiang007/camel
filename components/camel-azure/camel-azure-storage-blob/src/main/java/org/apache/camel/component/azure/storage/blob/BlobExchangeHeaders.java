@@ -476,4 +476,9 @@ public class BlobExchangeHeaders {
         headers.put(BlobConstants.RAW_HTTP_HEADERS, httpHeaders);
         return this;
     }
+
+    public BlobExchangeHeaders snapshotId(final String snapshotId) {
+        headers.put(BlobConstants.BLOB_SNAPSHOT_ID, snapshotId);
+        return this;
+    }
 }

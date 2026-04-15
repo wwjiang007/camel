@@ -4270,6 +4270,18 @@ public interface BlobEndpointBuilderFactory {
         public String azureStorageBlobContext() {
             return "CamelAzureStorageBlobContext";
         }
+        /**
+         * The snapshot identifier returned after creating a blob snapshot.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: consumer
+         * 
+         * @return the name of the header {@code AzureStorageBlobSnapshotId}.
+         */
+        public String azureStorageBlobSnapshotId() {
+            return "CamelAzureStorageBlobSnapshotId";
+        }
     }
     static BlobEndpointBuilder endpointBuilder(String componentName, String path) {
         class BlobEndpointBuilderImpl extends AbstractEndpointBuilder implements BlobEndpointBuilder, AdvancedBlobEndpointBuilder {

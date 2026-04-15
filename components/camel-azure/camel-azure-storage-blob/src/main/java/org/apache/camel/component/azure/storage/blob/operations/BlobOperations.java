@@ -50,6 +50,7 @@ import com.azure.storage.blob.models.PageRangeItem;
 import com.azure.storage.blob.models.ParallelTransferOptions;
 import com.azure.storage.blob.sas.BlobSasPermission;
 import com.azure.storage.blob.sas.BlobServiceSasSignatureValues;
+import com.azure.storage.blob.specialized.BlobClientBase;
 import com.azure.storage.blob.specialized.BlobLeaseClient;
 import org.apache.camel.Exchange;
 import org.apache.camel.Message;
@@ -579,6 +580,27 @@ public class BlobOperations {
                         commonRequestOptions.getTimeout());
 
         return BlobOperationResponse.create(response);
+    }
+
+    public BlobOperationResponse createBlobSnapshot(final Exchange exchange) {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Creating a snapshot of blob [{}] from exchange [{}]...", configurationProxy.getBlobName(exchange),
+                    exchange);
+        }
+
+        final BlobCommonRequestOptions commonRequestOptions = getCommonRequestOptions(exchange);
+
+        final Response<BlobClientBase> response = client.createSnapshot(
+                commonRequestOptions.getMetadata(),
+                commonRequestOptions.getBlobRequestConditions(),
+                commonRequestOptions.getTimeout());
+
+        final BlobClientBase snapshotClient = response.getValue();
+        final BlobExchangeHeaders exchangeHeaders = BlobExchangeHeaders.create()
+                .snapshotId(snapshotClient.getSnapshotId())
+                .httpHeaders(response.getHeaders());
+
+        return BlobOperationResponse.create(snapshotClient.getSnapshotId(), exchangeHeaders.toMap());
     }
 
     private DownloadRetryOptions getDownloadRetryOptions(final BlobConfigurationOptionsProxy configurationProxy) {

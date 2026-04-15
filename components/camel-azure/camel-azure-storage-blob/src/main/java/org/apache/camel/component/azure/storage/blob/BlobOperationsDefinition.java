@@ -137,5 +137,9 @@ public enum BlobOperationsDefinition {
      * Returns transaction logs of all the changes that occur to the blobs and the blob metadata in your storage
      * account. The change feed provides ordered, guaranteed, durable, immutable, read-only log of these changes.
      */
-    copyBlob
+    copyBlob,
+    /**
+     * Creates a read-only snapshot of a blob. The snapshot ID is returned in the exchange headers.
+     */
+    createBlobSnapshot
 }
