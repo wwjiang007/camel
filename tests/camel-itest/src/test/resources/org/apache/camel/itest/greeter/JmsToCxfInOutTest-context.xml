@@ -60,6 +60,7 @@
             <property name="deserializationFilter" value="java.**;javax.**;org.apache.camel.**;org.apache.cxf.**;!*"/>
         </bean>
       </property>
+      <property name="deserializationFilter" value="org.apache.cxf.*"/>
     </bean>
 
     <camelContext xmlns="http://camel.apache.org/schema/spring">
