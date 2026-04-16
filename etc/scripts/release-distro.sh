@@ -36,7 +36,7 @@ echo "##########################################################################
 echo "${DOWNLOAD}/${VERSION}"
 
 wget -e robots=off --wait 3 --no-check-certificate \
- -r -np "--reject=html,txt" "--follow-tags=" \
+ -r -np "--accept=pom,pom.asc,zip,zip.asc,tar.gz,tar.gz.asc" "--follow-tags=" \
  -P "${DOWNLOAD}/${VERSION}" -nH "--cut-dirs=3" "--level=1" "--ignore-length" \
  "https://repository.apache.org/content/repositories/releases/org/apache/camel/apache-camel/${VERSION}/"
 
