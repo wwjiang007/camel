@@ -51,7 +51,7 @@ public class BlobConfiguration implements Cloneable {
     @UriParam(label = "producer",
               enums = "listBlobContainers,createBlobContainer,deleteBlobContainer,listBlobs,getBlob,deleteBlob,downloadBlobToFile,downloadLink,"
                       + "uploadBlockBlob,uploadBlockBlobChunked,stageBlockBlobList,commitBlobBlockList,getBlobBlockList,createAppendBlob,commitAppendBlob,createPageBlob,uploadPageBlob,resizePageBlob,"
-                      + "clearPageBlob,getPageBlobRanges,copyBlob,createBlobSnapshot",
+                      + "clearPageBlob,getPageBlobRanges,getChangeFeed,copyBlob,createBlobSnapshot",
               defaultValue = "listBlobContainers")
     private BlobOperationsDefinition operation = BlobOperationsDefinition.listBlobContainers;
     @UriParam(label = "common")
