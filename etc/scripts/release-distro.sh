@@ -52,7 +52,7 @@ rm "${DOWNLOAD_LOCATION}/"*.sha1
 # Create sha512 check sum files
 cd "${DOWNLOAD_LOCATION}"
 for file in *.pom *.tar.gz *.zip; do
-  sha512sum "${file}" > "${file}.sha512"
+  [ -f "${file}" ] && sha512sum "${file}" > "${file}.sha512"
 done
 
 echo "################################################################################"
