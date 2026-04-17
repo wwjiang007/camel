@@ -53,7 +53,9 @@ import com.azure.storage.blob.models.PageBlobRequestConditions;
 import com.azure.storage.blob.models.PageRange;
 import com.azure.storage.blob.models.PageRangeItem;
 import com.azure.storage.blob.models.ParallelTransferOptions;
+import com.azure.storage.blob.options.BlobGetTagsOptions;
 import com.azure.storage.blob.options.BlobParallelUploadOptions;
+import com.azure.storage.blob.options.BlobSetTagsOptions;
 import com.azure.storage.blob.options.BlobUploadFromFileOptions;
 import com.azure.storage.blob.options.BlockBlobSimpleUploadOptions;
 import com.azure.storage.blob.options.ListPageRangesOptions;
@@ -345,6 +347,27 @@ public class BlobClientWrapper {
             return this;
         }
         return new BlobClientWrapper(client.getSnapshotClient(snapshotId));
+    }
+
+    public Response<Void> setTags(
+            final Map<String, String> tags,
+            final BlobRequestConditions requestConditions,
+            final Duration timeout) {
+        BlobSetTagsOptions options = new BlobSetTagsOptions(tags);
+        if (requestConditions != null) {
+            options.setRequestConditions(requestConditions);
+        }
+        return client.setTagsWithResponse(options, timeout, Context.NONE);
+    }
+
+    public Response<Map<String, String>> getTags(
+            final BlobRequestConditions requestConditions,
+            final Duration timeout) {
+        BlobGetTagsOptions options = new BlobGetTagsOptions();
+        if (requestConditions != null) {
+            options.setRequestConditions(requestConditions);
+        }
+        return client.getTagsWithResponse(options, timeout, Context.NONE);
     }
 
     public BlobLeaseClient getLeaseClient() {

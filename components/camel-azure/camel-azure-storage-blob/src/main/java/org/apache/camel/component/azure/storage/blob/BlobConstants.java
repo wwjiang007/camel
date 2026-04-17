@@ -288,6 +288,10 @@ public final class BlobConstants {
                             + " downloadLink) it can be provided as input to target a specific blob snapshot.",
               javaType = "String")
     public static final String BLOB_SNAPSHOT_ID = HEADER_PREFIX + "SnapshotId";
+    @Metadata(description = "(producer) (setBlobTags) The tags to set on the blob as key-value pairs.\n"
+                            + "(consumer) The tags retrieved from the blob.",
+              javaType = "Map<String,String>")
+    public static final String BLOB_TAGS = HEADER_PREFIX + "Tags";
 
     private BlobConstants() {
     }

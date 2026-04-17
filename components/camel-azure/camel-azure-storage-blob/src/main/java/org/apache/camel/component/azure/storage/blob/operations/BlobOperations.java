@@ -608,6 +608,56 @@ public class BlobOperations {
         return BlobOperationResponse.create(snapshotClient.getSnapshotId(), exchangeHeaders.toMap());
     }
 
+    @SuppressWarnings("unchecked")
+    public BlobOperationResponse setBlobTags(final Exchange exchange) {
+        ObjectHelper.notNull(exchange, MISSING_EXCHANGE);
+
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Setting tags on blob [{}] from exchange [{}]...", configurationProxy.getBlobName(exchange), exchange);
+        }
+
+        Map<String, String> tags = configurationProxy.getBlobTags(exchange);
+        if (tags == null) {
+            tags = exchange.getIn().getBody(Map.class);
+        }
+        if (tags == null || tags.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "Tags must be specified either as the message body (Map<String,String>) or via the "
+                                               + BlobConstants.BLOB_TAGS + " header.");
+        }
+
+        final BlobCommonRequestOptions commonRequestOptions = getCommonRequestOptions(exchange);
+
+        final Response<Void> response = client.setTags(
+                tags,
+                commonRequestOptions.getBlobRequestConditions(),
+                commonRequestOptions.getTimeout());
+
+        final BlobExchangeHeaders exchangeHeaders = BlobExchangeHeaders.create()
+                .httpHeaders(response.getHeaders());
+
+        return BlobOperationResponse.createWithEmptyBody(exchangeHeaders.toMap());
+    }
+
+    public BlobOperationResponse getBlobTags(final Exchange exchange) {
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Getting tags from blob [{}] from exchange [{}]...", configurationProxy.getBlobName(exchange), exchange);
+        }
+
+        final BlobCommonRequestOptions commonRequestOptions = getCommonRequestOptions(exchange);
+
+        final Response<Map<String, String>> response = client.getTags(
+                commonRequestOptions.getBlobRequestConditions(),
+                commonRequestOptions.getTimeout());
+
+        final Map<String, String> tags = response.getValue();
+        final BlobExchangeHeaders exchangeHeaders = BlobExchangeHeaders.create()
+                .blobTags(tags)
+                .httpHeaders(response.getHeaders());
+
+        return BlobOperationResponse.create(tags, exchangeHeaders.toMap());
+    }
+
     private DownloadRetryOptions getDownloadRetryOptions(final BlobConfigurationOptionsProxy configurationProxy) {
         return new DownloadRetryOptions().setMaxRetryRequests(configurationProxy.getMaxRetryRequests());
     }

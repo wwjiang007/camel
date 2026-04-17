@@ -140,5 +140,14 @@ public enum BlobOperationsDefinition {
     /**
      * Creates a read-only snapshot of a blob. The snapshot ID is returned in the exchange headers.
      */
-    createBlobSnapshot
+    createBlobSnapshot,
+    /**
+     * Sets user-defined index tags on a blob. Tags are key-value pairs that can be used to filter and query blobs
+     * across containers.
+     */
+    setBlobTags,
+    /**
+     * Retrieves user-defined index tags from a blob.
+     */
+    getBlobTags
 }
