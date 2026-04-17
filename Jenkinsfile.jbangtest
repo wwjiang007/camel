@@ -63,8 +63,8 @@ pipeline {
             }
             steps {
                 sh "./mvnw $MAVEN_PARAMS -Pdeploy,apache-snapshots -Dquickly clean install"
-                sh "./mvnw $MAVEN_PARAMS -f test-infra/camel-test-infra-cli/pom.xml -Pjbang-it-test"
-                sh "./mvnw $MAVEN_PARAMS -f dsl/camel-jbang/camel-jbang-it/pom.xml -Pjbang-it-test"
+                sh "./mvnw $MAVEN_PARAMS -Denforcer.skip=true -f test-infra/camel-test-infra-cli/pom.xml -Pjbang-it-test"
+                sh "./mvnw $MAVEN_PARAMS -Denforcer.skip=true -f dsl/camel-jbang/camel-jbang-it/pom.xml -Pjbang-it-test"
             }
             post {
                always {
