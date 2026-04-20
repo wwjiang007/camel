@@ -14,28 +14,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.camel.dsl.jbang.launcher;
+package org.apache.camel.dsl.jbang.core.commands.tui;
 
 import org.apache.camel.dsl.jbang.core.commands.CamelJBangMain;
-import org.apache.camel.dsl.jbang.core.commands.generate.GeneratePlugin;
-import org.apache.camel.dsl.jbang.core.commands.kubernetes.KubernetesPlugin;
-import org.apache.camel.dsl.jbang.core.commands.tui.TuiPlugin;
-import org.apache.camel.dsl.jbang.core.commands.validate.ValidatePlugin;
+import org.apache.camel.dsl.jbang.core.common.CamelJBangPlugin;
+import org.apache.camel.dsl.jbang.core.common.Plugin;
 import picocli.CommandLine;
 
-/**
- * Main for Camel Launcher
- */
-public class CamelLauncherMain extends CamelJBangMain {
+@CamelJBangPlugin(name = "camel-jbang-plugin-tui", firstVersion = "4.20.0")
+public class TuiPlugin implements Plugin {
+
+    private ClassLoader classLoader;
 
     @Override
-    public void postAddCommands(CommandLine commandLine, String[] args) {
-        // install embedded plugins
-        new GeneratePlugin().customize(commandLine, this);
-        new KubernetesPlugin().customize(commandLine, this);
-        new TuiPlugin().customize(commandLine, this);
-        new ValidatePlugin().customize(commandLine, this);
-        // citrus test plugin cannot (yet) be embedded
+    public void setClassLoader(ClassLoader classLoader) {
+        this.classLoader = classLoader;
     }
 
+    @Override
+    public void customize(CommandLine commandLine, CamelJBangMain main) {
+        var cmd = new picocli.CommandLine(new TuiCommand(main, classLoader))
+                .addSubcommand("monitor", new CommandLine(new CamelMonitor(main, classLoader)))
+                .addSubcommand("catalog", new CommandLine(new CamelCatalogTui(main, classLoader)));
+
+        commandLine.addSubcommand("tui", cmd);
+    }
 }
