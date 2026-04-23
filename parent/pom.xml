@@ -4213,8 +4213,8 @@
                 <version>${maven-javadoc-plugin-version}</version>
                 <configuration>
                     <links>
-                        <link>http://docs.oracle.com/javase/8/docs/api/</link>
-                        <link>http://docs.oracle.com/javaee/7/api/</link>
+                        <link>https://docs.oracle.com/en/java/javase/${jdk.version}/docs/api/</link>
+                        <link>https://docs.oracle.com/javaee/7/api/</link>
                         <link>http://docs.spring.io/spring/docs/${spring-version}/javadoc-api/</link>
                     </links>
                     <stylesheetfile>${basedir}/../../etc/css/stylesheet.css</stylesheetfile>
