@@ -256,6 +256,86 @@ class BlobOperationsTest extends CamelTestSupport {
     }
 
     @Test
+    void testSetBlobTags() {
+        final HttpHeaders httpHeaders = new HttpHeaders().set("x-test-header", "123");
+
+        when(client.setTags(any(), any(), any()))
+                .thenReturn(new ResponseBase<>(null, 204, httpHeaders, null, null));
+
+        final Map<String, String> tags = new HashMap<>();
+        tags.put("status", "quarantine");
+        tags.put("category", "document");
+
+        final Exchange exchange = new DefaultExchange(context);
+        exchange.getIn().setHeader(BlobConstants.BLOB_TAGS, tags);
+
+        final BlobOperations operations = new BlobOperations(configuration, client);
+        final BlobOperationResponse response = operations.setBlobTags(exchange);
+
+        assertNotNull(response);
+        assertTrue((boolean) response.getBody());
+        assertNotNull(response.getHeaders());
+        assertEquals("123", ((HttpHeaders) response.getHeaders().get(BlobConstants.RAW_HTTP_HEADERS))
+                .get("x-test-header").getValue());
+    }
+
+    @Test
+    void testSetBlobTagsFromBody() {
+        final HttpHeaders httpHeaders = new HttpHeaders().set("x-test-header", "456");
+
+        when(client.setTags(any(), any(), any()))
+                .thenReturn(new ResponseBase<>(null, 204, httpHeaders, null, null));
+
+        final Map<String, String> tags = new HashMap<>();
+        tags.put("owner", "test-user");
+
+        final Exchange exchange = new DefaultExchange(context);
+        exchange.getIn().setBody(tags);
+
+        final BlobOperations operations = new BlobOperations(configuration, client);
+        final BlobOperationResponse response = operations.setBlobTags(exchange);
+
+        assertNotNull(response);
+        assertTrue((boolean) response.getBody());
+    }
+
+    @Test
+    void testSetBlobTagsWithNoTagsThrows() {
+        final Exchange exchange = new DefaultExchange(context);
+        exchange.getIn().setBody("not-a-map");
+
+        final BlobOperations operations = new BlobOperations(configuration, client);
+        assertThrows(IllegalArgumentException.class, () -> operations.setBlobTags(exchange));
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void testGetBlobTags() {
+        final Map<String, String> tags = new HashMap<>();
+        tags.put("status", "clean");
+        tags.put("scannedBy", "antivirus");
+
+        final HttpHeaders httpHeaders = new HttpHeaders().set("x-test-header", "789");
+
+        when(client.getTags(any(), any()))
+                .thenReturn(new ResponseBase<>(null, 200, httpHeaders, tags, null));
+
+        final Exchange exchange = new DefaultExchange(context);
+
+        final BlobOperations operations = new BlobOperations(configuration, client);
+        final BlobOperationResponse response = operations.getBlobTags(exchange);
+
+        assertNotNull(response);
+        assertNotNull(response.getBody());
+        final Map<String, String> resultTags = (Map<String, String>) response.getBody();
+        assertEquals("clean", resultTags.get("status"));
+        assertEquals("antivirus", resultTags.get("scannedBy"));
+        assertEquals(tags, response.getHeaders().get(BlobConstants.BLOB_TAGS));
+        assertEquals("789", ((HttpHeaders) response.getHeaders().get(BlobConstants.RAW_HTTP_HEADERS))
+                .get("x-test-header").getValue());
+    }
+
+    @Test
     void testCreateBlobSnapshot() {
         final String snapshotId = "2026-04-15T10:00:00.0000000Z";
         final HttpHeaders httpHeaders = new HttpHeaders().set("x-test-header", "123");

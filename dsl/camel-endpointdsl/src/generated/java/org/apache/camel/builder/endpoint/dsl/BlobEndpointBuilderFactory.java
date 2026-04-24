@@ -4339,6 +4339,19 @@ public interface BlobEndpointBuilderFactory {
         public String azureStorageBlobSnapshotId() {
             return "CamelAzureStorageBlobSnapshotId";
         }
+        /**
+         * (producer) (setBlobTags) The tags to set on the blob as key-value
+         * pairs. (consumer) The tags retrieved from the blob.
+         * 
+         * The option is a: {@code Map<String,String>} type.
+         * 
+         * Group: common
+         * 
+         * @return the name of the header {@code AzureStorageBlobTags}.
+         */
+        public String azureStorageBlobTags() {
+            return "CamelAzureStorageBlobTags";
+        }
     }
     static BlobEndpointBuilder endpointBuilder(String componentName, String path) {
         class BlobEndpointBuilderImpl extends AbstractEndpointBuilder implements BlobEndpointBuilder, AdvancedBlobEndpointBuilder {
