@@ -289,6 +289,19 @@
                             <outputFile>src/generated/resources/schema/camelYamlDsl.json</outputFile>
                         </configuration>
                     </execution>
+                    <!-- canonical camelCase -->
+                    <execution>
+                        <id>generate-yaml-schema-canonical</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate-yaml-schema</goal>
+                        </goals>
+                        <configuration>
+                            <additionalProperties>false</additionalProperties>
+                            <canonical>true</canonical>
+                            <outputFile>src/generated/resources/schema/camelYamlDsl-canonical.json</outputFile>
+                        </configuration>
+                    </execution>
                 </executions>
             </plugin>
             <plugin>
