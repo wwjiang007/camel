@@ -4,7 +4,7 @@
 :artifactid: camel-hazelcast
 :description: Increment, decrement, get, etc. operations on a Hazelcast PN Counter (CRDT counter).
 :since: 4.19
-:supportlevel: Stable
+:supportlevel: Preview
 :tabs-sync-option:
 :component-header: Only producer is supported
 //Manually maintained attributes

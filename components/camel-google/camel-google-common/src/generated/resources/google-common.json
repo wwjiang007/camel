@@ -7,7 +7,7 @@
     "deprecated": false,
     "firstVersion": "4.19.0",
     "label": "cloud,google",
-    "supportLevel": "Stable",
+    "supportLevel": "Preview",
     "groupId": "org.apache.camel",
     "artifactId": "camel-google-common",
     "version": "4.21.0-SNAPSHOT"
