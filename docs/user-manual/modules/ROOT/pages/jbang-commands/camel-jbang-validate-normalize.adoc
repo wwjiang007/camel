@@ -1,5 +1,7 @@
 = camel validate normalize
 
+*Available as of Camel 4.20*
+
 Normalize YAML routes to canonical (explicit) form.
 
 This command parses YAML routes and rewrites them in canonical form, expanding all shorthands and
@@ -8,7 +10,7 @@ implicit expressions. For example, `log: "$\{body}"` becomes `log: { message: "$
 
 The normalized output is valid against both the classic and canonical schemas.
 
-See the xref:components:others:yaml-dsl.adoc#_schema_variants[YAML DSL Schema Variants] documentation for details
+See the xref:components:others:yaml-dsl.adoc[YAML DSL Schema Variants] documentation for details
 on the differences between the classic and canonical schemas.
 
 
