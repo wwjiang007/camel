@@ -61,6 +61,9 @@ public class BlobProducer extends DefaultProducer {
             case listBlobContainers:
                 setResponse(exchange, blobServiceOperations.listBlobContainers(exchange));
                 break;
+            case findBlobsByTags:
+                setResponse(exchange, blobServiceOperations.findBlobsByTags(exchange));
+                break;
             // container operations
             case createBlobContainer:
                 setResponse(exchange, getContainerOperations(exchange).createContainer(exchange));

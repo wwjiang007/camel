@@ -25,6 +25,12 @@ public enum BlobOperationsDefinition {
      * Returns a list of containers in the storage account.
      */
     listBlobContainers,
+    /**
+     * Returns a list of blobs across the storage account whose index tags match the given SQL-like filter expression
+     * (for example {@code "Environment" = 'Production' AND "Status" = 'Active'}). The filter is read from the
+     * {@code CamelAzureStorageBlobTagFilter} header or the message body.
+     */
+    findBlobsByTags,
 
     // Operations on the container level
     //

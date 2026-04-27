@@ -125,6 +125,7 @@ For these operations, `accountName` is *required*.
 |Operation |Description
 |`listBlobContainers`  |Get the content of the blob. You can restrict the output of this operation to a blob range.
 |`getChangeFeed` | Returns transaction logs of all the changes that occur to the blobs and the blob metadata in your storage account. The change feed provides ordered, guaranteed, durable, immutable, read-only log of these changes.
+|`findBlobsByTags` | Returns a list of blobs across the storage account whose index tags match the SQL-like filter expression provided via the `CamelAzureStorageBlobTagFilter` header or the message body. Optionally honours `CamelAzureStorageBlobMaxResultsPerPage` and `CamelAzureStorageBlobTimeout`. The result body is a `List<TaggedBlobItem>`.
 |===
 
 *Operations on the container level*
@@ -761,6 +762,18 @@ from("direct:setBlobTags")
 from("direct:getBlobTags")
   .to("azure-storage-blob://camelazure/container1?blobName=hello.txt&operation=getBlobTags&serviceClient=#client")
   .log("Tags: ${body}")
+  .to("mock:result");
+--------------------------------------------------------------------------------
+
+- `findBlobsByTags`
+
+[source,java]
+--------------------------------------------------------------------------------
+
+from("direct:findBlobsByTags")
+  .setHeader(BlobConstants.BLOB_TAG_FILTER, constant("\"Environment\" = 'Production' AND \"Status\" = 'Active'"))
+  .to("azure-storage-blob://camelazure?operation=findBlobsByTags&serviceClient=#client")
+  .log("Matching blobs: ${body}")
   .to("mock:result");
 --------------------------------------------------------------------------------
 

@@ -49,7 +49,7 @@ public class BlobConfiguration implements Cloneable {
     @UriParam(label = "security", security = "secret")
     private String accessKey;
     @UriParam(label = "producer",
-              enums = "listBlobContainers,createBlobContainer,deleteBlobContainer,listBlobs,getBlob,deleteBlob,downloadBlobToFile,downloadLink,"
+              enums = "listBlobContainers,findBlobsByTags,createBlobContainer,deleteBlobContainer,listBlobs,getBlob,deleteBlob,downloadBlobToFile,downloadLink,"
                       + "uploadBlockBlob,uploadBlockBlobChunked,stageBlockBlobList,commitBlobBlockList,getBlobBlockList,createAppendBlob,commitAppendBlob,createPageBlob,uploadPageBlob,resizePageBlob,"
                       + "clearPageBlob,getPageBlobRanges,getChangeFeed,copyBlob,createBlobSnapshot,setBlobTags,getBlobTags",
               defaultValue = "listBlobContainers")

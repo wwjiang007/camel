@@ -279,6 +279,10 @@ public class BlobConfigurationOptionsProxy {
         return BlobExchangeHeaders.getBlobTagsFromHeaders(exchange);
     }
 
+    public String getBlobTagFilter(final Exchange exchange) {
+        return BlobExchangeHeaders.getBlobTagFilterFromHeaders(exchange);
+    }
+
     public BlobConfiguration getConfiguration() {
         return configuration;
     }
