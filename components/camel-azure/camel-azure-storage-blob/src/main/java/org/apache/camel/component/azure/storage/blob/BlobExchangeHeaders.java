@@ -491,6 +491,10 @@ public class BlobExchangeHeaders {
         return getObjectFromHeaders(exchange, BlobConstants.BLOB_TAGS, Map.class);
     }
 
+    public static String getBlobTagFilterFromHeaders(final Exchange exchange) {
+        return getObjectFromHeaders(exchange, BlobConstants.BLOB_TAG_FILTER, String.class);
+    }
+
     public BlobExchangeHeaders blobTags(final Map<String, String> tags) {
         headers.put(BlobConstants.BLOB_TAGS, tags);
         return this;

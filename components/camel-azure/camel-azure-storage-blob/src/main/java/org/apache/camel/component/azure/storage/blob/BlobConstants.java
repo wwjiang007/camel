@@ -292,6 +292,11 @@ public final class BlobConstants {
                             + "(consumer) The tags retrieved from the blob.",
               javaType = "Map<String,String>")
     public static final String BLOB_TAGS = HEADER_PREFIX + "Tags";
+    @Metadata(label = "producer",
+              description = "(findBlobsByTags) A SQL-like expression that filters blobs across the storage account based on their"
+                            + " index tags, for example `\"Environment\" = 'Production' AND \"Status\" = 'Active'`.",
+              javaType = "String")
+    public static final String BLOB_TAG_FILTER = HEADER_PREFIX + "TagFilter";
 
     private BlobConstants() {
     }
