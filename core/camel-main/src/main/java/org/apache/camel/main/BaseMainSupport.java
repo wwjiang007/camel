@@ -673,13 +673,14 @@ public abstract class BaseMainSupport extends BaseService {
             }
         }
 
-        // log summary of configurations
+        // enforce security policies on all auto-configured properties
+        // (must run before logConfigurationSummary which clears the map)
+        enforceSecurityPolicies(camelContext, autoConfiguredProperties);
+
+        // log summary must be last as it removes entries from autoConfiguredProperties
         if (mainConfigurationProperties.isAutoConfigurationLogSummary() && !autoConfiguredProperties.isEmpty()) {
             logConfigurationSummary(camelContext, autoConfiguredProperties);
         }
-
-        // enforce security policies on all auto-configured properties
-        enforceSecurityPolicies(camelContext, autoConfiguredProperties);
 
         // we are now done with the main helper during bootstrap
         helper.bootstrapDone();
