@@ -511,4 +511,45 @@ public class MainSecurityPolicyTest {
                 .filter(v -> "secret".equals(v.category())).findFirst().orElseThrow();
         assertEquals("fail", secretViolation.policy());
     }
+
+    @Test
+    void testFileBasedInsecureDevFailPolicy() {
+        // Properties from files have a file-based location (not [camel-main]),
+        // which tests that enforcement works regardless of property source location
+        Main main = new Main();
+        main.setPropertyPlaceholderLocations("classpath:security-insecure-dev.properties");
+        main.addInitialProperty("camel.security.policy", "fail");
+
+        RuntimeCamelException ex = assertThrows(RuntimeCamelException.class, main::start);
+        assertTrue(ex.getMessage().contains("Security policy violations detected"));
+        assertTrue(ex.getMessage().contains("devConsoleEnabled"));
+    }
+
+    @Test
+    void testFileBasedInsecureSslFailPolicy() {
+        Main main = new Main();
+        main.setPropertyPlaceholderLocations("classpath:security-insecure-ssl.properties");
+        main.addInitialProperty("camel.security.policy", "fail");
+
+        RuntimeCamelException ex = assertThrows(RuntimeCamelException.class, main::start);
+        assertTrue(ex.getMessage().contains("Security policy violations detected"));
+        assertTrue(ex.getMessage().contains("trustAllCertificates"));
+    }
+
+    @Test
+    void testFileBasedInsecureDevWarnPolicy() throws Exception {
+        Main main = new Main();
+        main.setPropertyPlaceholderLocations("classpath:security-insecure-dev.properties");
+
+        main.start();
+        try {
+            SecurityPolicyResult result
+                    = main.getCamelContext().getCamelContextExtension().getContextPlugin(SecurityPolicyResult.class);
+            assertNotNull(result);
+            assertTrue(result.hasViolations());
+            assertEquals("insecure:dev", result.getViolations().get(0).category());
+        } finally {
+            main.stop();
+        }
+    }
 }
