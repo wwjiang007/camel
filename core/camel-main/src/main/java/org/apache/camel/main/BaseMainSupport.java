@@ -2199,7 +2199,7 @@ public abstract class BaseMainSupport extends BaseService {
             // generate a self-signed certificate for development use
             LOG.warn("Generating self-signed SSL certificate for development use."
                      + " Do NOT use this in production.");
-            String password = "camel-self-signed";
+            String password = "camel-self-signed"; // NOSONAR
             KeyStore ks = SelfSignedCertificateGenerator.generateKeyStore(password);
 
             KeyStoreParameters ksp = new KeyStoreParameters();
