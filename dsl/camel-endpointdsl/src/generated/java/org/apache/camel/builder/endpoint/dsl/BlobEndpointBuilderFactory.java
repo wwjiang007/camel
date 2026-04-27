@@ -4352,6 +4352,20 @@ public interface BlobEndpointBuilderFactory {
         public String azureStorageBlobTags() {
             return "CamelAzureStorageBlobTags";
         }
+        /**
+         * (findBlobsByTags) A SQL-like expression that filters blobs across the
+         * storage account based on their index tags, for example Environment =
+         * 'Production' AND Status = 'Active'.
+         * 
+         * The option is a: {@code String} type.
+         * 
+         * Group: producer
+         * 
+         * @return the name of the header {@code AzureStorageBlobTagFilter}.
+         */
+        public String azureStorageBlobTagFilter() {
+            return "CamelAzureStorageBlobTagFilter";
+        }
     }
     static BlobEndpointBuilder endpointBuilder(String componentName, String path) {
         class BlobEndpointBuilderImpl extends AbstractEndpointBuilder implements BlobEndpointBuilder, AdvancedBlobEndpointBuilder {
